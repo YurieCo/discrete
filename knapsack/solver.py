@@ -27,7 +27,7 @@ def solve_it(input_data):
     weight = 0
     taken = [0]*len(items)
 
-    for item in sorted(items, key=lambda x: x.value):
+    for item in sorted(items, key=lambda x: float(x.value) / float(x.weight)):
         if weight + item.weight <= capacity:
             taken[item.index] = 1
             value += item.value
