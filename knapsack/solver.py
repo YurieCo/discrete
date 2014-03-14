@@ -21,17 +21,26 @@ def solve_it(input_data):
         parts = line.split()
         items.append(Item(i-1, int(parts[0]), int(parts[1])))
 
-    value, taken = knapsack(items, capacity)
+    taken = [0]*len(items)
+    taken = knapsack(items, capacity, taken, 0)
+
+    value = evaluate(items, taken)
 
     # prepare the solution in the specified output format
     output_data = str(value) + ' ' + str(1) + '\n'
     output_data += ' '.join(map(str, taken))
     return output_data
 
-def knapsack(items, capacity):
-    item_count = len(items)
+def evaluate(items, taken):
     value = 0
-    taken = [0]*len(items)
+    for item in items:
+        if taken[item.index] == 1:
+            value += item.value
+
+    return value
+
+def knapsack(items, capacity, taken, index):
+    item_count = len(items)
     optimal = [[0 for j in range (item_count + 1)] for k in range(capacity+1)]
 
     for j in range(1, item_count+1):
@@ -48,9 +57,8 @@ def knapsack(items, capacity):
         if optimal[k][j] != optimal[k][j-1]:
             taken[j-1] = 1
             k -= items[j-1].weight
-            value += items[j-1].value
 
-    return value, taken
+    return taken
 
 import sys
 
