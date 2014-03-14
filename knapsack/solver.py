@@ -21,20 +21,28 @@ def solve_it(input_data):
         parts = line.split()
         items.append(Item(i-1, int(parts[0]), int(parts[1])))
 
-    # a trivial greedy algorithm for filling the knapsack
-    # it takes items in-order until the knapsack is full
     value = 0
-    weight = 0
     taken = [0]*len(items)
+    optimal = [[0 for j in range (item_count + 1)] for k in range(capacity+1)]
 
-    for item in sorted(items, key=lambda x: -float(x.value) / float(x.weight)):
-        if weight + item.weight <= capacity:
-            taken[item.index] = 1
-            value += item.value
-            weight += item.weight
-    
+    for j in range(1, len(items)+1):
+        item = items[j-1]
+        for k in range(capacity+1):
+            if item.weight <= k:
+                optimal[k][j] = max(optimal[k][j-1],
+                                    item.value + optimal[k-item.weight][j-1])
+            else:
+                optimal[k][j] = optimal[k][j-1]
+
+    k = capacity
+    for j in range(item_count, 1, -1):
+        if optimal[k][j] != optimal[k][j-1]:
+            taken[j-1] = 1
+            k -= items[j-1].weight
+            value += items[j-1].value
+
     # prepare the solution in the specified output format
-    output_data = str(value) + ' ' + str(0) + '\n'
+    output_data = str(value) + ' ' + str(1) + '\n'
     output_data += ' '.join(map(str, taken))
     return output_data
 
