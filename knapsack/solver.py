@@ -22,9 +22,7 @@ def solve_it(input_data):
         items.append(Item(i-1, int(parts[0]), int(parts[1])))
 
     taken = [0]*len(items)
-    taken = knapsack(items, capacity, taken, 0)
-
-    value = evaluate(items, taken)
+    value, taken = knapsack(items, capacity, taken, 0)
 
     # prepare the solution in the specified output format
     output_data = str(value) + ' ' + str(1) + '\n'
@@ -34,31 +32,35 @@ def solve_it(input_data):
 def evaluate(items, taken):
     value = 0
     for item in items:
-        if taken[item.index] == 1:
-            value += item.value
-
+        value += item.value * taken[item.index]
     return value
 
+def weight(items, taken):
+    weight = 0
+    for item in items:
+        weight += item.weight * taken[item.index]
+    return weight
+
+import copy
 def knapsack(items, capacity, taken, index):
-    item_count = len(items)
-    optimal = [[0 for j in range (item_count + 1)] for k in range(capacity+1)]
-
-    for j in range(1, item_count+1):
-        item = items[j-1]
-        for k in range(capacity+1):
-            if item.weight <= k:
-                optimal[k][j] = max(optimal[k][j-1],
-                                    item.value + optimal[k-item.weight][j-1])
-            else:
-                optimal[k][j] = optimal[k][j-1]
-
-    k = capacity
-    for j in range(item_count, 1, -1):
-        if optimal[k][j] != optimal[k][j-1]:
-            taken[j-1] = 1
-            k -= items[j-1].weight
-
-    return taken
+    if index == len(items):
+        return evaluate(items, taken), copy.copy(taken)
+    
+    dontTake = copy.copy(taken)
+    dontTake[index] = 0
+    v1, t1 = knapsack(items, capacity, dontTake, index + 1)
+    
+    take = copy.copy(taken)
+    take[index] = 1
+    if weight(items, take) <= capacity:
+        v2, t2 = knapsack(items, capacity, take, index + 1)
+    
+        if v2 > v1:
+            return v2, t2
+        else:
+            return v1, t1
+    else:
+        return v1, t1
 
 import sys
 
